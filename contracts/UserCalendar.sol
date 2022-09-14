@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 contract UserCalendar {
   uint256 public utc;
   uint256 public rate;
-  uint256 public appointmentId;
+  uint256 public appointmentId = 1;
   address public owner;
 
   struct Appointment {
@@ -40,17 +40,17 @@ contract UserCalendar {
     return rate;
   }
 
-  function createAppointment(string memory _title, address _attendee, uint256 _start, uint256 _end, uint256 _payRate) external {
+  function createAppointment(string memory _title, address _attendee, uint256 _start, uint256 _end) external {
     Appointment memory appointment;
     appointment.id = appointmentId;
     appointment.title = _title;
     appointment.attendee = _attendee;
     appointment.start = _start;
     appointment.end = _end;
-    appointment.payRate = _payRate;
+    appointment.payRate = rate;
 
     appointments.push(appointment);
-    appointmentId = appointmentId++;
+    appointmentId = appointmentId+1;
   }
 
   function readAppointments() external view returns (Appointment[] memory) {
