@@ -23,13 +23,18 @@ contract UserCalendar {
   }
 
   function createUtc(uint256 _utc) external {
+    // UTC range from -12 to +12
     require(msg.sender == owner);
     utc = _utc;
   }
 
   function getUtc() external view returns(uint256) {
     return utc;
-  } 
+  }
+
+  function currentTime() external view returns(uint256) {
+    return uint256(block.timestamp + (utc * 60 * 60));
+  }
 
   function createRate(uint256 _rate) external {
     require(msg.sender == owner);

@@ -60,4 +60,12 @@ describe("UserCalendar", function () {
     // console.log(apptList);
     expect(apptList[1].id).to.equal(0);
   });
+
+  it("return current time based on UTC zone", async function() {
+    this.userCal.createUtc(8);
+    const now = Math.floor(new Date().getTime() / 1000) + (8*60*60);
+    const time = (Number(await this.userCal.currentTime()) + Number(await this.userCal.getUtc()));
+    console.log(`${now}\n${time}`)
+    expect((time >= now && time-15 <= now)).to.equal(true);
+  })
 });
