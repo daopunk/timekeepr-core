@@ -4,27 +4,42 @@ pragma solidity ^0.8.9;
 contract UserCalendar {
   uint256 public utc;
   uint256 public rate;
-  uint256 public appointmentId = 1;
+  // appointmentId is the index in the appointmentsArr array
+  uint256 public appointmentId = 0;
   address public owner;
 
   struct Appointment {
     uint256 id;
     string title;
     address attendee;
-    uint256 start;
-    uint256 end;
+    string date;
+    uint256 day;
+    uint256 startTime;
+    uint256 endTime;
     uint256 payRate;
+    bool isActive;
   }
 
-  Appointment[] public appointments;
+  mapping (uint256 => mapping(uint256 => bool)) public availability;
+
+  /**
+   * @dev "20220918" => (1330 => 1234) = appointment on September 18th, 1:30PM with id 1234
+   */
+  mapping (string => mapping(uint256 => uint256)) public appointments;
+
+  Appointment[] public appointmentsArr;
 
   constructor() {
     owner = msg.sender;
   }
 
-  function createUtc(uint256 _utc) external {
+  modifier onlyOwner() {
+    require(msg.sender == owner, "only owner function");
+    _;
+  }
+
+  function createUtc(uint256 _utc) external onlyOwner {
     // UTC range from -12 to +12
-    require(msg.sender == owner);
     utc = _utc;
   }
 
@@ -36,8 +51,7 @@ contract UserCalendar {
     return uint256(block.timestamp + (utc * 60 * 60));
   }
 
-  function createRate(uint256 _rate) external {
-    require(msg.sender == owner);
+  function createRate(uint256 _rate) external onlyOwner {
     rate = _rate;
   }
 
@@ -45,28 +59,74 @@ contract UserCalendar {
     return rate;
   }
 
-  function createAppointment(string memory _title, address _attendee, uint256 _start, uint256 _end) external {
+  /**
+   * @dev set an availability block per day
+   * @param _day 0-6 day of the week
+   * @param _startTime 0000 - 2345 hour and minute block by 15 minute intervals
+   * @param _endTime end time same format as start time
+   */
+  function setAvailability(uint256 _day, uint256 _startTime, uint256 _endTime) external onlyOwner {
+    require(_day >= 0 && _day <= 6, "day is invalid");
+    require(_startTime >= 0, "start time is invalid");
+    require(_endTime <= 2345, "start time is invalid");
+
+    uint i = _startTime;
+    for (i; i < _endTime; i += 15) {
+      availability[_day][i] = true;
+    }
+  }
+
+  function deleteAvailability(uint256 _day, uint256 _startTime, uint256 _endTime) external onlyOwner {
+    require(_day >= 0 && _day <= 6, "day is invalid");
+
+    uint i = _startTime;
+    for (i; i < _endTime; i += 15) {
+      availability[_day][i] = false;
+    }
+
+  }
+
+  // todo: should appointments need to be proposed by anyone and approved by only owner?
+  function createAppointment(
+    string memory _title,
+    string memory _date,
+    uint256 _day,
+    address _attendee,
+    uint256 _startTime,
+    uint256 _endTime
+  ) external {
+
+    // check if time is available
+
+    require(_day >=0 && _day <= 6, "day is invalid");
+
+    uint i = _startTime;
+    for (i; i < _endTime; i += 15) {
+      require(availability[_day][i] == true, "this appointment date and time is not available");
+    }
+
     Appointment memory appointment;
     appointment.id = appointmentId;
     appointment.title = _title;
+    appointment.date = _date;
+    appointment.day = _day;
     appointment.attendee = _attendee;
-    appointment.start = _start;
-    appointment.end = _end;
+    appointment.startTime = _startTime;
+    appointment.endTime = _endTime;
     appointment.payRate = rate;
 
-    appointments.push(appointment);
+    appointments[_date][_startTime] = appointmentId;
+    appointmentsArr.push(appointment);
     appointmentId = appointmentId+1;
   }
 
   function readAppointments() external view returns (Appointment[] memory) {
-    return appointments;
+    // todo: get start and end dates
+    return appointmentsArr;
   }
 
-  function deleteAppointment(uint256 _appointmentId) external {
-    for (uint256 i=0; i<appointments.length; i++) {
-      if (_appointmentId == appointments[i].id) {
-        delete appointments[i];
-      }
-    }
+  function deleteAppointment(uint256 _appointmentId) external onlyOwner {
+    // todo: remove appointment from appointments mapping
+    delete appointmentsArr[_appointmentId];
   }
 }
