@@ -133,7 +133,7 @@ contract UserCalendar {
     uint256 end = appointmentsArr[_appointmentId].endTime;
 
     for (i; i < end; i += 15) {
-      appointments[date][i] = true;
+      appointments[date][i] = false;
     }
     // does not remove appt from array, only sets all data to 0
     delete appointmentsArr[_appointmentId];
