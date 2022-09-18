@@ -4,8 +4,7 @@ pragma solidity ^0.8.9;
 contract UserCalendar {
   uint256 public utc;
   uint256 public rate;
-  // appointmentId is the index in the appointmentsArr array
-  uint256 public appointmentId = 0;
+  uint256 public appointmentId = 1; // index for appointmentsArr, MUST START AT 1
   address public owner;
 
   struct Appointment {
@@ -20,12 +19,14 @@ contract UserCalendar {
     bool isActive;
   }
 
+  // day (0-6) => start/endTime (15-minute instance) => (bool)
   mapping (uint256 => mapping(uint256 => bool)) public availability;
 
   /**
    * @dev "20220918" => (1330 => 1234) = appointment on September 18th, 1:30PM with id 1234
+   * ("year + month + day") => (hour + minute) => (bool)
    */
-  mapping (string => mapping(uint256 => uint256)) public appointments;
+  mapping (string => mapping(uint256 => bool)) public appointments;
 
   Appointment[] public appointmentsArr;
 
@@ -83,7 +84,6 @@ contract UserCalendar {
     for (i; i < _endTime; i += 15) {
       availability[_day][i] = false;
     }
-
   }
 
   // todo: should appointments need to be proposed by anyone and approved by only owner?
@@ -96,13 +96,12 @@ contract UserCalendar {
     uint256 _endTime
   ) external {
 
-    // check if time is available
-
     require(_day >=0 && _day <= 6, "day is invalid");
 
     uint i = _startTime;
     for (i; i < _endTime; i += 15) {
-      require(availability[_day][i] == true, "this appointment date and time is not available");
+      require(availability[_day][i] == true, "this appointment time is outside working hours");
+      require(appointments[_date][i] == false, "this appointment date and time is not available");
     }
 
     Appointment memory appointment;
@@ -115,7 +114,10 @@ contract UserCalendar {
     appointment.endTime = _endTime;
     appointment.payRate = rate;
 
-    appointments[_date][_startTime] = appointmentId;
+    for (i; i < _endTime; i += 15) {
+      appointments[_date][i] = true;
+    }
+
     appointmentsArr.push(appointment);
     appointmentId = appointmentId+1;
   }
@@ -126,7 +128,14 @@ contract UserCalendar {
   }
 
   function deleteAppointment(uint256 _appointmentId) external onlyOwner {
-    // todo: remove appointment from appointments mapping
+    string memory date = appointmentsArr[_appointmentId].date;
+    uint256 i = appointmentsArr[_appointmentId].startTime;
+    uint256 end = appointmentsArr[_appointmentId].endTime;
+
+    for (i; i < end; i += 15) {
+      appointments[date][i] = true;
+    }
+    // does not remove appt from array, only sets all data to 0
     delete appointmentsArr[_appointmentId];
   }
 }
