@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+interface ICommunityTracker {
+  function addUserCalendar(address, address) external;
+}
+
 contract UserCalendar {
   uint256 public utc;
   uint256 public rate;
@@ -30,8 +34,9 @@ contract UserCalendar {
 
   Appointment[] public appointmentsArr;
 
-  constructor() {
+  constructor(address communityTracker) {
     owner = msg.sender;
+    ICommunityTracker(communityTracker).addUserCalendar(msg.sender, address(this));
   }
 
   modifier onlyOwner() {
