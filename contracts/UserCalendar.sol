@@ -20,12 +20,18 @@ contract UserCalendar {
     bool isActive;
   }
 
+  /**
+   * 0 - 6 days
+   * mapping
+   * 0000 - 2345 => true
+   * 1315 -
+   */
   mapping (uint256 => mapping(uint256 => bool)) public availability;
 
   /**
-   * @dev "20220918" => (1330 => 1234) = appointment on September 18th, 1:30PM with id 1234
+   * @dev "20220918" => (1330 => true) = appointment on September 18th, 1:30PM 
    */
-  mapping (string => mapping(uint256 => uint256)) public appointments;
+  mapping (string => mapping(uint256 => bool)) public appointments;
 
   Appointment[] public appointmentsArr;
 
@@ -70,6 +76,8 @@ contract UserCalendar {
     require(_startTime >= 0, "start time is invalid");
     require(_endTime <= 2345, "start time is invalid");
 
+    // 0800 -> 1845
+
     uint i = _startTime;
     for (i; i < _endTime; i += 15) {
       availability[_day][i] = true;
@@ -87,6 +95,11 @@ contract UserCalendar {
   }
 
   // todo: should appointments need to be proposed by anyone and approved by only owner?
+  /**
+   * @param _date "20220918" -> September 18th, 2022
+   * @param _day 4 -> day of the week
+   * @param _startTime 1715 -> 5:15pm
+   */
   function createAppointment(
     string memory _title,
     string memory _date,
@@ -98,12 +111,14 @@ contract UserCalendar {
 
     // check if time is available
 
-    require(_day >=0 && _day <= 6, "day is invalid");
+    require(_day >= 0 && _day <= 6, "day is invalid");
 
-    uint i = _startTime;
+    uint256 i = _startTime;
     for (i; i < _endTime; i += 15) {
       require(availability[_day][i] == true, "this appointment date and time is not available");
+      require(appointments[_date][i] != true, "this appointment date and time is not available because of a preexisting appointment");
     }
+    // todo: check if no appointment already exists
 
     Appointment memory appointment;
     appointment.id = appointmentId;
@@ -112,10 +127,18 @@ contract UserCalendar {
     appointment.day = _day;
     appointment.attendee = _attendee;
     appointment.startTime = _startTime;
+    // consider uisng duration of 15 min blocks
     appointment.endTime = _endTime;
     appointment.payRate = rate;
 
-    appointments[_date][_startTime] = appointmentId;
+    // wip
+    appointments[_date][_startTime] = true;
+
+    i = _startTime;
+    for (i; i < _endTime; i += 15) {
+      appointments[_date][i] = true;
+    }
+
     appointmentsArr.push(appointment);
     appointmentId = appointmentId+1;
   }
