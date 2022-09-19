@@ -8,7 +8,7 @@ interface ICommunityTracker {
 contract UserCalendar {
   uint256 public utc;
   uint256 public rate;
-  uint256 public appointmentId = 1; // index for appointmentsArr, MUST START AT 1
+  uint256 public appointmentId = 1; // index for appointmentsArray, MUST START AT 1
   address public owner;
 
   struct Appointment {
@@ -18,9 +18,9 @@ contract UserCalendar {
     string date;
     uint256 day;
     uint256 startTime;
-    uint256 endTime;
+    uint256 duration;
     uint256 payRate;
-    bool isActive;
+    // bool isActive;
   }
 
   /**
@@ -36,7 +36,7 @@ contract UserCalendar {
    */
   mapping (string => mapping(uint256 => bool)) public appointments;
 
-  Appointment[] public appointmentsArr;
+  Appointment[] public appointmentsArray;
 
   constructor(address communityTracker) {
     owner = msg.sender;
@@ -80,13 +80,21 @@ contract UserCalendar {
     require(_startTime >= 0, "start time is invalid");
     require(_endTime <= 2345, "start time is invalid");
 
-    // 0800 -> 1845
-
     uint i = _startTime;
-    for (i; i < _endTime; i += 15) {
+    for (i; i < _endTime; i += 25) {
       availability[_day][i] = true;
     }
   }
+  
+  // function readAvailability() external {
+  //   bool[] memory availableHours;
+  //   for (uint256 i=0; i<6; i++) {
+  //     for (uint256 j=0; j<2400; j += 15) {
+  //        availableHours.push(availability[i][j]);
+  //     }
+  //   }
+  //   return availableHours;
+  // }
 
   function deleteAvailability(uint256 _day, uint256 _startTime, uint256 _endTime) external onlyOwner {
     require(_day >= 0 && _day <= 6, "day is invalid");
@@ -98,6 +106,8 @@ contract UserCalendar {
   }
 
   // todo: should appointments need to be proposed by anyone and approved by only owner?
+  // ^not necessary for MVP, but would be nice optional feature to add
+
   /**
    * @param _date "20220918" -> September 18th, 2022
    * @param _day 4 -> day of the week
@@ -109,16 +119,15 @@ contract UserCalendar {
     uint256 _day,
     address _attendee,
     uint256 _startTime,
-    uint256 _endTime
+    uint256 _duration
   ) external {
 
     // check if time is available
 
     require(_day >= 0 && _day <= 6, "day is invalid");
 
-    uint256 i = _startTime;
-    for (i; i < _endTime; i += 15) {
-      require(availability[_day][i] == true, "this appointment date and time is not available");
+    for (uint256 i=0; i < _duration; i++) {
+      require(availability[_day][_startTime + (i*25)] == true, "this appointment date and time is not available");
       require(appointments[_date][i] != true, "this appointment date and time is not available because of a preexisting appointment");
     }
     // todo: check if no appointment already exists
@@ -130,36 +139,35 @@ contract UserCalendar {
     appointment.day = _day;
     appointment.attendee = _attendee;
     appointment.startTime = _startTime;
-    // consider uisng duration of 15 min blocks
-    appointment.endTime = _endTime;
+    appointment.duration = _duration;
     appointment.payRate = rate;
 
     // wip
     appointments[_date][_startTime] = true;
 
-    i = _startTime;
-    for (i; i < _endTime; i += 15) {
-      appointments[_date][i] = true;
+
+    for (uint256 j=0; j < _duration; j++) {
+      appointments[_date][j] = true;
     }
 
-    appointmentsArr.push(appointment);
+    appointmentsArray.push(appointment);
     appointmentId = appointmentId+1;
   }
 
   function readAppointments() external view returns (Appointment[] memory) {
     // todo: get start and end dates
-    return appointmentsArr;
+    return appointmentsArray;
   }
 
   function deleteAppointment(uint256 _appointmentId) external onlyOwner {
-    string memory date = appointmentsArr[_appointmentId].date;
-    uint256 i = appointmentsArr[_appointmentId].startTime;
-    uint256 end = appointmentsArr[_appointmentId].endTime;
+    string memory date = appointmentsArray[_appointmentId].date;
+    uint256 start = appointmentsArray[_appointmentId].startTime;
+    uint256 duration = appointmentsArray[_appointmentId].duration;
 
-    for (i; i < end; i += 15) {
-      appointments[date][i] = false;
+    for (uint256 i=0; i < duration; i++) {
+      appointments[date][start + (i*25)] = false;
     }
     // does not remove appt from array, only sets all data to 0
-    delete appointmentsArr[_appointmentId];
+    delete appointmentsArray[_appointmentId - 1];
   }
 }

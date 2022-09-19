@@ -12,9 +12,17 @@ describe("UserCalendar", function () {
     users = [u1.address, u2.address, u3.address, u4.address];
     now = await time.latest();
 
+    const CommunityTracker = await ethers.getContractFactory("CommunityTracker");
+    this.tracker = await CommunityTracker.deploy();
+    await this.tracker.deployed();
+
     const UserCalendar = await ethers.getContractFactory("UserCalendar");
-    this.userCal = await UserCalendar.deploy();
+    this.userCal = await UserCalendar.deploy(this.tracker.address);
     await this.userCal.deployed();
+
+    for (let i=0; i<7; i++) {
+      this.userCal.setAvailability(i, 0000, 2345);
+    }
   });
 
   it("set and check UTC", async function (){
@@ -22,30 +30,43 @@ describe("UserCalendar", function () {
     expect(await this.userCal.getUtc()).to.equal("8");
   });
 
+  it("return current time based on UTC zone", async function() {
+    this.userCal.createUtc(8);
+    const now = Math.floor(new Date().getTime() / 1000) + (8*60*60);
+    const time = (Number(await this.userCal.currentTime()) + Number(await this.userCal.getUtc()));
+    // console.log(`${now}\n${time}`)
+    expect((time >= now && time-25 <= now)).to.equal(true);
+  });
+
   it("set and check rate", async function (){
     this.userCal.createRate(5);
     expect(await this.userCal.getRate()).to.equal("5");
   });
 
-  it("should create 3 appointments and read list", async function (){
-  // args: string memory _title, address _attendee, uint256 _start, uint256 _end, uint256 _payRate
+  it("create 3 appointments and read list", async function (){
     this.userCal.createAppointment(
       "initial meet",
+      "20220925",
+      0,
       users[0],
-      now + ONE_DAY + (8*ONE_HOUR),
-      now + ONE_DAY + (9*ONE_HOUR)
+      1000,
+      4
     );
     this.userCal.createAppointment(
       "second meet",
+      "20220926",
+      1,
+      users[2],
+      1300,
+      4
+    );
+    this.userCal.createAppointment(
+      "third meet",
+      "20220924",
+      6,
       users[1],
-      now + ONE_DAY + (12*ONE_HOUR),
-      now + ONE_DAY + (14*ONE_HOUR)
-    );
-    this.userCal.createAppointment(
-      "second meet",
-      users[3],
-      now + ONE_DAY + (15*ONE_HOUR),
-      now + ONE_DAY + (15.5*ONE_HOUR)
+      1500,
+      3
     );
 
     const apptList = await this.userCal.readAppointments();
@@ -54,18 +75,42 @@ describe("UserCalendar", function () {
   });
 
   it("delete 2nd appointment and read list", async function() {
-    await this.userCal.deleteAppointment(2);
+    const apptID = 3;
+    await this.userCal.deleteAppointment(apptID);
 
     const apptList = await this.userCal.readAppointments();
-    // console.log(apptList);
-    expect(apptList[1].id).to.equal(0);
+    console.log(apptList);
+    expect(apptList[apptID-1].id).to.equal(0);
   });
 
-  it("return current time based on UTC zone", async function() {
-    this.userCal.createUtc(8);
-    const now = Math.floor(new Date().getTime() / 1000) + (8*60*60);
-    const time = (Number(await this.userCal.currentTime()) + Number(await this.userCal.getUtc()));
-    console.log(`${now}\n${time}`)
-    expect((time >= now && time-15 <= now)).to.equal(true);
-  })
+  // it("create 2/3 appointments to manage schedule conflict", async function (){
+  //   this.userCal.createAppointment(
+  //     "fourth meet",
+  //     "20220925",
+  //     0,
+  //     users[0],
+  //     0800,
+  //     4
+  //   );
+  //   this.userCal.createAppointment(
+  //     "fifth meet",
+  //     "20220926",
+  //     1,
+  //     users[2],
+  //     1050,
+  //     4
+  //   );
+  //   this.userCal.createAppointment(
+  //     "sixth meet",
+  //     "20220924",
+  //     6,
+  //     users[1],
+  //     6000,
+  //     3
+  //   );
+
+  //   const apptList = await this.userCal.readAppointments();
+  //   console.log(apptList);
+  //   expect(apptList.length).to.equal(5);
+  // });
 });
