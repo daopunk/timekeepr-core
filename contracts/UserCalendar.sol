@@ -23,6 +23,11 @@ contract UserCalendar {
     // bool isActive;
   }
 
+  struct Availability {
+    uint256 startTime;
+    uint256 endTime;
+  }
+
   /**
    * 0 - 6 days
    * mapping
@@ -35,9 +40,9 @@ contract UserCalendar {
    * @dev "20220918" => (1330 => true) = appointment on September 18th, 1:30PM 
    */
   mapping (string => mapping(uint256 => bool)) public appointments;
-
+  
+  Availability[7] public availabilityArray;
   Appointment[] public appointmentsArray;
-  uint256[] public occupiedSlots;
 
   constructor(address communityTracker) {
     owner = msg.sender;
@@ -85,17 +90,14 @@ contract UserCalendar {
     for (i; i < _endTime; i += 25) {
       availability[_day][i] = true;
     }
+
+    availabilityArray[_day].startTime = _startTime;
+    availabilityArray[_day].endTime = _endTime;
   }
   
-  // function readAvailability() external {
-  //   bool[] memory availableHours;
-  //   for (uint256 i=0; i<6; i++) {
-  //     for (uint256 j=0; j<2400; j += 15) {
-  //        availableHours.push(availability[i][j]);
-  //     }
-  //   }
-  //   return availableHours;
-  // }
+  function readAvailability() external view returns (Availability[7] memory) {
+    return availabilityArray;
+  }
 
   function deleteAvailability(uint256 _day, uint256 _startTime, uint256 _endTime) external onlyOwner {
     require(_day >= 0 && _day <= 6, "day is invalid");

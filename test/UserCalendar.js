@@ -3,12 +3,11 @@ const { expect } = require("chai");
 const { time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("UserCalendar", function () {
-  let deployer, users, now;
+  let deployer, users;
 
   before(async function() {
     [deployer, u1, u2, u3, u4] = await ethers.getSigners();
     users = [u1.address, u2.address, u3.address, u4.address];
-    now = await time.latest();
 
     const CommunityTracker = await ethers.getContractFactory("CommunityTracker");
     this.tracker = await CommunityTracker.deploy();
@@ -19,9 +18,16 @@ describe("UserCalendar", function () {
     await this.userCal.deployed();
 
     // set availability
+    let end = 2100;
     for (let i=0; i<7; i++) {
-      this.userCal.setAvailability(i, 0800, 2200);
+      this.userCal.setAvailability(i, 0800, end + (i*25));
     }
+  });
+
+  it("read availability", async function(){
+    const schedule = await this.userCal.readAvailability();
+    // console.log(schedule);
+    expect(schedule.length).to.equal(7);
   });
 
   it("set and check UTC", async function (){
@@ -135,6 +141,4 @@ describe("UserCalendar", function () {
     // console.log(apptList);
     expect(apptList.length).to.equal(6);
   });
-
-  
 });
