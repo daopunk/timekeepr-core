@@ -3,8 +3,6 @@ const { expect } = require("chai");
 const { time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("UserCalendar", function () {
-  const ONE_DAY = 24 * 60 * 60;
-  const ONE_HOUR = 60 * 60
   let deployer, users, now;
 
   before(async function() {
@@ -20,6 +18,7 @@ describe("UserCalendar", function () {
     this.userCal = await UserCalendar.deploy(this.tracker.address);
     await this.userCal.deployed();
 
+    // set availability
     for (let i=0; i<7; i++) {
       this.userCal.setAvailability(i, 0000, 2345);
     }
@@ -79,38 +78,38 @@ describe("UserCalendar", function () {
     await this.userCal.deleteAppointment(apptID);
 
     const apptList = await this.userCal.readAppointments();
-    console.log(apptList);
+    // console.log(apptList);
     expect(apptList[apptID-1].id).to.equal(0);
   });
 
-  // it("create 2/3 appointments to manage schedule conflict", async function (){
-  //   this.userCal.createAppointment(
-  //     "fourth meet",
-  //     "20220925",
-  //     0,
-  //     users[0],
-  //     0800,
-  //     4
-  //   );
-  //   this.userCal.createAppointment(
-  //     "fifth meet",
-  //     "20220926",
-  //     1,
-  //     users[2],
-  //     1050,
-  //     4
-  //   );
-  //   this.userCal.createAppointment(
-  //     "sixth meet",
-  //     "20220924",
-  //     6,
-  //     users[1],
-  //     6000,
-  //     3
-  //   );
+  it("create 2/3 appointments to manage schedule conflict", async function (){
+    this.userCal.createAppointment(
+      "fourth meet",
+      "20220927",
+      2,
+      users[0],
+      0800,
+      4
+    );
+    this.userCal.createAppointment(
+      "fifth meet",
+      "20220927",
+      2,
+      users[2],
+      0900,
+      4
+    );
+    this.userCal.createAppointment(
+      "sixth meet",
+      "20220927",
+      2,
+      users[1],
+      0930,
+      3
+    );
 
-  //   const apptList = await this.userCal.readAppointments();
-  //   console.log(apptList);
-  //   expect(apptList.length).to.equal(5);
-  // });
+    const apptList = await this.userCal.readAppointments();
+    // console.log(apptList);
+    expect(apptList.length).to.equal(5);
+  });
 });

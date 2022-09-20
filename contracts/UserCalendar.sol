@@ -123,12 +123,11 @@ contract UserCalendar {
   ) external {
 
     // check if time is available
-
     require(_day >= 0 && _day <= 6, "day is invalid");
 
     for (uint256 i=0; i < _duration; i++) {
       require(availability[_day][_startTime + (i*25)] == true, "this appointment date and time is not available");
-      require(appointments[_date][i] != true, "this appointment date and time is not available because of a preexisting appointment");
+      require(appointments[_date][_startTime + (i*25)] != true, "this appointment date and time is not available because of a preexisting appointment");
     }
     // todo: check if no appointment already exists
 
@@ -142,9 +141,7 @@ contract UserCalendar {
     appointment.duration = _duration;
     appointment.payRate = rate;
 
-    // wip
     appointments[_date][_startTime] = true;
-
 
     for (uint256 j=0; j < _duration; j++) {
       appointments[_date][j] = true;
