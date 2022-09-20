@@ -15,17 +15,13 @@ contract UserCalendar {
     uint256 id;
     string title;
     address attendee;
-    string date;
+    // string date;
+    uint256 date;
     uint256 day;
     uint256 startTime;
     uint256 duration;
     uint256 payRate;
     // bool isActive;
-  }
-
-  struct Availability {
-    uint256 startTime;
-    uint256 endTime;
   }
 
   /**
@@ -39,9 +35,10 @@ contract UserCalendar {
   /**
    * @dev "20220918" => (1330 => true) = appointment on September 18th, 1:30PM 
    */
-  mapping (string => mapping(uint256 => bool)) public appointments;
-  
-  Availability[7] public availabilityArray;
+  // mapping (string => mapping(uint256 => bool)) public appointments;
+  mapping (uint256 => mapping(uint256 => bool)) public appointments;
+
+  uint256[2][7] public availabilityArray = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
   Appointment[] public appointmentsArray;
 
   constructor(address communityTracker) {
@@ -90,12 +87,10 @@ contract UserCalendar {
     for (i; i < _endTime; i += 25) {
       availability[_day][i] = true;
     }
-
-    availabilityArray[_day].startTime = _startTime;
-    availabilityArray[_day].endTime = _endTime;
+    availabilityArray[_day] = [_startTime, _endTime];
   }
   
-  function readAvailability() external view returns (Availability[7] memory) {
+  function readAvailability() external view returns (uint256[2][7] memory) {
     return availabilityArray;
   }
 
@@ -118,7 +113,8 @@ contract UserCalendar {
    */
   function createAppointment(
     string memory _title,
-    string memory _date,
+    // string memory _date,
+    uint256 _date,
     uint256 _day,
     address _attendee,
     uint256 _startTime,
@@ -157,18 +153,24 @@ contract UserCalendar {
     return appointmentsArray;
   }
 
-  // function createSchedule(uint256 days) external returns (uint256[] memory) {
-  //   delete occupiedSlots;
-
-  //   for (uint256 i=0; i<appointmentsArray.length; i++) {
-  //     occupiedSlots.push(appointmentsArray[i].startTime);
+// wip
+  // function sortAppointments() external returns (Appointment[] memory) {
+  //   for (uint i=1; i<appointmentsArray.length; i++) {
+  //     Appointment memory key = appointmentsArray[i];
+  //     uint256 j = i-1;
+  //     while (j>=0 && appointmentsArray[j].date > key.date) {
+  //       appointmentsArray[j+1] = appointmentsArray[j];
+  //       j = j-1;
+  //     }
+  //     appointmentsArray[j+1] = key;
   //   }
-  //   return occupiedSlots;
+  //   return appointmentsArray;
   // }
 
   function deleteAppointment(uint256 _appointmentId) external onlyOwner {
     uint256 positionId = _appointmentId - 1;
-    string memory date = appointmentsArray[positionId].date;
+    // string memory date = appointmentsArray[positionId].date;
+    uint256 date = appointmentsArray[positionId].date;
     uint256 start = appointmentsArray[positionId].startTime;
     uint256 duration = appointmentsArray[positionId].duration;
 

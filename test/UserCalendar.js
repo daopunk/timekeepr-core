@@ -141,4 +141,15 @@ describe("UserCalendar", function () {
     // console.log(apptList);
     expect(apptList.length).to.equal(6);
   });
+
+// wip
+  // it("sort appointments in order of date", async function (){
+  //   const tx = await this.userCal.sortAppointments();
+  //   await tx.wait();
+  //   // console.log(apptList);
+  //   // console.log(tx);
+
+  //   // const apptList2 = await this.userCal.readAppointments();
+  //   // console.log(apptList2);
+  // })
 });
