@@ -20,7 +20,7 @@ describe("UserCalendar", function () {
 
     // set availability
     for (let i=0; i<7; i++) {
-      this.userCal.setAvailability(i, 0000, 2345);
+      this.userCal.setAvailability(i, 0800, 2200);
     }
   });
 
@@ -112,4 +112,29 @@ describe("UserCalendar", function () {
     // console.log(apptList);
     expect(apptList.length).to.equal(5);
   });
+
+  it("create appointments only within availability", async function (){
+    this.userCal.createAppointment(
+      "seventh meet",
+      "20220928",
+      3,
+      users[0],
+      0800,
+      4
+    );
+    this.userCal.createAppointment(
+      "eighth meet",
+      "20220929",
+      4,
+      users[0],
+      0600,
+      4
+    );
+
+    const apptList = await this.userCal.readAppointments();
+    // console.log(apptList);
+    expect(apptList.length).to.equal(6);
+  });
+
+  
 });

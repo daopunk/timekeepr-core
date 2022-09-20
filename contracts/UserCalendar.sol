@@ -37,6 +37,7 @@ contract UserCalendar {
   mapping (string => mapping(uint256 => bool)) public appointments;
 
   Appointment[] public appointmentsArray;
+  uint256[] public occupiedSlots;
 
   constructor(address communityTracker) {
     owner = msg.sender;
@@ -100,7 +101,7 @@ contract UserCalendar {
     require(_day >= 0 && _day <= 6, "day is invalid");
 
     uint i = _startTime;
-    for (i; i < _endTime; i += 15) {
+    for (i; i < _endTime; i += 25) {
       availability[_day][i] = false;
     }
   }
@@ -129,7 +130,6 @@ contract UserCalendar {
       require(availability[_day][_startTime + (i*25)] == true, "this appointment date and time is not available");
       require(appointments[_date][_startTime + (i*25)] != true, "this appointment date and time is not available because of a preexisting appointment");
     }
-    // todo: check if no appointment already exists
 
     Appointment memory appointment;
     appointment.id = appointmentId;
@@ -152,9 +152,17 @@ contract UserCalendar {
   }
 
   function readAppointments() external view returns (Appointment[] memory) {
-    // todo: get start and end dates
     return appointmentsArray;
   }
+
+  // function createSchedule(uint256 days) external returns (uint256[] memory) {
+  //   delete occupiedSlots;
+
+  //   for (uint256 i=0; i<appointmentsArray.length; i++) {
+  //     occupiedSlots.push(appointmentsArray[i].startTime);
+  //   }
+  //   return occupiedSlots;
+  // }
 
   function deleteAppointment(uint256 _appointmentId) external onlyOwner {
     uint256 positionId = _appointmentId - 1;
