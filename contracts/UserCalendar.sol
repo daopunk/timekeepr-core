@@ -160,14 +160,15 @@ contract UserCalendar {
   }
 
   function deleteAppointment(uint256 _appointmentId) external onlyOwner {
-    string memory date = appointmentsArray[_appointmentId].date;
-    uint256 start = appointmentsArray[_appointmentId].startTime;
-    uint256 duration = appointmentsArray[_appointmentId].duration;
+    uint256 positionId = _appointmentId - 1;
+    string memory date = appointmentsArray[positionId].date;
+    uint256 start = appointmentsArray[positionId].startTime;
+    uint256 duration = appointmentsArray[positionId].duration;
 
     for (uint256 i=0; i < duration; i++) {
       appointments[date][start + (i*25)] = false;
     }
     // does not remove appt from array, only sets all data to 0
-    delete appointmentsArray[_appointmentId - 1];
+    delete appointmentsArray[positionId];
   }
 }

@@ -75,7 +75,7 @@ describe("UserCalendar", function () {
   });
 
   it("delete 2nd appointment and read list", async function() {
-    const apptID = 3;
+    const apptID = 2;
     await this.userCal.deleteAppointment(apptID);
 
     const apptList = await this.userCal.readAppointments();
