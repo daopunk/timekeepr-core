@@ -144,7 +144,10 @@ contract UserCalendar {
     appointmentId = appointmentId+1;
   }
 
-// wip
+  function readAppointments() external view returns (Appointment[] memory) {
+    return appointmentsArray;
+  }
+
   function sortAppointments() external {
     bool swapped = true;
     while (swapped) {
@@ -155,6 +158,14 @@ contract UserCalendar {
           appointmentsArray[i] = appointmentsArray[i+1];
           appointmentsArray[i+1] = temp;
           swapped = true;
+        }
+        if (appointmentsArray[i].date == appointmentsArray[i+1].date) {
+          if (appointmentsArray[i].startTime > appointmentsArray[i+1].startTime) {
+            Appointment memory temp = appointmentsArray[i];
+            appointmentsArray[i] = appointmentsArray[i+1];
+            appointmentsArray[i+1] = temp;
+            swapped = true;
+          }
         }
       }
     }

@@ -88,21 +88,21 @@ describe("UserCalendar", function () {
     expect(apptList[apptID-1].id).to.equal(0);
   });
 
-  it("create 2/3 appointments to manage schedule conflict", async function (){
-    this.userCal.createAppointment(
-      "fourth meet",
-      "20220927",
-      2,
-      users[0],
-      0800,
-      4
-    );
+  it("create 2/3 appointments to manage schedule conflict and sort", async function (){
     this.userCal.createAppointment(
       "fifth meet",
       "20220927",
       2,
       users[2],
       0900,
+      4
+    );
+    this.userCal.createAppointment(
+      "fourth meet",
+      "20220927",
+      2,
+      users[0],
+      0800,
       4
     );
     this.userCal.createAppointment(
@@ -144,10 +144,8 @@ describe("UserCalendar", function () {
 
 // wip
   it("sort appointments in order of date", async function (){
-    const tx = await this.userCal.sortAppointments();
-    await tx.wait();
-
-    const apptList2 = await this.userCal.readAppointments();
-    console.log(apptList2);
+    await this.userCal.sortAppointments();
+    // const apptList = await this.userCal.readAppointments();
+    console.log(apptList);
   })
 });
