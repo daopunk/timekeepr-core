@@ -15,8 +15,8 @@ contract CommunityTracker {
   address public owner;
   mapping(address => address) userCalendars;
 
-  constructor() {
-    owner = msg.sender;
+  constructor(address _owner) {
+    owner = _owner;
   }
 
   // 

@@ -10,6 +10,8 @@ contract UserCalendar {
   uint256 public rate;
   uint256 public appointmentId = 1; // index for appointmentsArray, MUST START AT 1
   address public owner;
+  string public name;
+  bool initialization;
 
   struct Appointment {
     uint256 id;
@@ -31,10 +33,12 @@ contract UserCalendar {
   uint256[2][7] public availabilityArray = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
   Appointment[] public appointmentsArray;
 
-  // clone constructor
-  function init(address communityTracker) external {
+  function init(string memory userName, address communityTracker) external {
+    require(initialization == false);
     owner = msg.sender;
+    name = userName;
     ICommunityTracker(communityTracker).addUserCalendar(msg.sender, address(this));
+    initialization = true;
   }
 
   modifier onlyOwner() {

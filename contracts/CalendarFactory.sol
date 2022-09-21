@@ -6,6 +6,7 @@ import "./CloneFactory.sol";
 contract CalendarFactory is CloneFactory {
   address public owner;
   address public baseUserCalendar;
+  address public communityTracker;
 
   mapping(address => address) userCalendars;
   UserCalendar[] public userCalendarsArray;
@@ -21,13 +22,14 @@ contract CalendarFactory is CloneFactory {
     _;
   }
 
-  function setBaseAddress(address _baseUserCalendar) external onlyOwner {
+  function setBases(address _baseUserCalendar, address _communityTracker) external onlyOwner {
     baseUserCalendar = _baseUserCalendar;
+    communityTracker = _communityTracker;
   }
 
-  function createUserCal(address communityTracker) external {
+  function createUserCal(string memory userName) external {
     UserCalendar userCalendar = UserCalendar(createClone(baseUserCalendar));
-    userCalendar.init(communityTracker);
+    userCalendar.init(userName, communityTracker);
 
     userCalendars[msg.sender] = address(userCalendar);
     userCalendarsArray.push(userCalendar);
