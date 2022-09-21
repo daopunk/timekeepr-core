@@ -31,7 +31,8 @@ contract UserCalendar {
   uint256[2][7] public availabilityArray = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
   Appointment[] public appointmentsArray;
 
-  constructor(address communityTracker) {
+  // clone constructor
+  function init(address communityTracker) external {
     owner = msg.sender;
     ICommunityTracker(communityTracker).addUserCalendar(msg.sender, address(this));
   }
