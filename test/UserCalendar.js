@@ -2,7 +2,7 @@ const { ethers } = require("hardhat");
 const { expect } = require("chai");
 const { time } = require("@nomicfoundation/hardhat-network-helpers");
 
-describe("UserCalendar", function () {
+describe("UserCalendar Test", function () {
   let deployer, users;
 
   before(async function() {
@@ -142,10 +142,9 @@ describe("UserCalendar", function () {
     expect(apptList.length).to.equal(6);
   });
 
-// wip
   it("sort appointments in order of date", async function (){
     await this.userCal.sortAppointments();
-    // const apptList = await this.userCal.readAppointments();
+    const apptList = await this.userCal.readAppointments();
     console.log(apptList);
   })
 });

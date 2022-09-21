@@ -13,7 +13,6 @@ interface IUserCalendar {
 
 contract CommunityTracker {
   address public owner;
-
   mapping(address => address) userCalendars;
 
   constructor() {

@@ -20,17 +20,12 @@ contract UserCalendar {
     uint256 startTime;
     uint256 duration;
     uint256 payRate;
-    // bool isActive;
   }
 
-  /**
-   * (0 - 6 days) => (0000 - 2345) => true
-   */
+  //(0 - 6 days) => (0000 - 2345) => true
   mapping (uint256 => mapping(uint256 => bool)) public availability;
 
-  /**
-   * @dev "20220918" => (1330 => true) = appointment on September 18th, 1:30PM 
-   */
+  // 20220918 => (0000 - 2345) => true
   mapping (uint256 => mapping(uint256 => bool)) public appointments;
 
   uint256[2][7] public availabilityArray = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
@@ -99,9 +94,6 @@ contract UserCalendar {
     }
   }
 
-  // todo: should appointments need to be proposed by anyone and approved by only owner?
-  // ^not necessary for MVP, but would be nice optional feature to add
-
   /**
    * @param _date "20220918" -> September 18th, 2022
    * @param _day 4 -> day of the week
@@ -116,12 +108,12 @@ contract UserCalendar {
     uint256 _duration
   ) external {
 
-    // check if time is available
     require(_day >= 0 && _day <= 6, "day is invalid");
 
+    // manage scheduling conflict
     for (uint256 i=0; i < _duration; i++) {
-      require(availability[_day][_startTime + (i*25)] == true, "this appointment date and time is not available");
-      require(appointments[_date][_startTime + (i*25)] != true, "this appointment date and time is not available because of a preexisting appointment");
+      require(availability[_day][_startTime + (i*25)] == true, "appointment date/time is outside of availability");
+      require(appointments[_date][_startTime + (i*25)] != true, "appointment date/time is not available");
     }
 
     Appointment memory appointment;
