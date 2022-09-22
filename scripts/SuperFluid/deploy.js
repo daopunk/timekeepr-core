@@ -2,17 +2,8 @@ const hre = require("hardhat");
 const { Framework } = require("@superfluid-finance/sdk-core");
 require("dotenv").config();
 
-//to run this script:
-//1) Make sure you've created your own .env file
-//2) Make sure that you have your network specified in hardhat.config.js
-//3) run: npx hardhat run scripts/deploy.js --network goerli
+// npx hardhat run scripts/deploy.js --network goerli
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
 
   const provider = new hre.ethers.providers.JsonRpcProvider(process.env.GOERLI_URL);
 
