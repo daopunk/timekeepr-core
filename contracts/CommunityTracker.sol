@@ -19,7 +19,6 @@ contract CommunityTracker {
     owner = _owner;
   }
 
-  // 
   /**
    * @dev called during UserCalendar deployment
    * Link EOA account to deployed UserCalendar contract
@@ -36,8 +35,6 @@ contract CommunityTracker {
     address _attendee,
     uint256 _startTime,
     uint256 _endTime ) external {
-
-    // todo: check group availability
 
     for (uint256 i; i < userEOAs.length; i++) {
       IUserCalendar(userEOAs[i]).createAppointment(_title, _date, _day, _attendee, _startTime, _endTime);
