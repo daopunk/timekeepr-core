@@ -8,7 +8,9 @@ contract CalendarFactory is CloneFactory {
   address public baseUserCalendar;
   address public communityTracker;
 
+  // EOA address to UserCalendar address
   mapping(address => address) userCalendars;
+
   UserCalendar[] public userCalendarsArray;
 
   event UserCalCreated(address userCalAddress);
@@ -22,25 +24,30 @@ contract CalendarFactory is CloneFactory {
     _;
   }
 
+  // set [base] UserCalendar address, set CommunityTracker for intitialization of UserCalendar 
   function setBases(address _baseUserCalendar, address _communityTracker) external onlyOwner {
     baseUserCalendar = _baseUserCalendar;
     communityTracker = _communityTracker;
   }
 
+  // create instance of UserCalendar with unique userName and call initialize function (constructor)
   function createUserCal(string memory userName) external {
     UserCalendar userCalendar = UserCalendar(createClone(baseUserCalendar));
     userCalendar.init(userName, communityTracker);
 
+    // add UserCalendar address to mapping and array for easy lookup
     userCalendars[msg.sender] = address(userCalendar);
     userCalendarsArray.push(userCalendar);
 
     emit UserCalCreated(communityTracker);
   }
 
-  function getUserCalendarClone(address user) external view returns (address userCalendar) {
-    return userCalendars[user];
+  // verify a single user by thier EOA address
+  function getUserCalendarClone(address userEOA) external view returns (address userCalendar) {
+    return userCalendars[userEOA];
   }
 
+  // get list of all UserCalendars
   function getAllUserCalendarClones() external view returns (UserCalendar[] memory) {
     return userCalendarsArray;
   }

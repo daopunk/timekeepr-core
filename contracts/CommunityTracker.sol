@@ -13,20 +13,20 @@ interface IUserCalendar {
 
 contract CommunityTracker {
   address public owner;
+
+  // map EOA address to UserCalendar address
   mapping(address => address) userCalendars;
 
   constructor(address _owner) {
     owner = _owner;
   }
 
-  /**
-   * @dev called during UserCalendar deployment
-   * Link EOA account to deployed UserCalendar contract
-   */
+  // called during UserCalendar deployment initialization
   function addUserCalendar(address userAddress, address userCalendar) external {
     userCalendars[userAddress] = userCalendar;
   }
 
+  // loops over array of EOAs to group schedule a meeting on each UserCalendar
   function createGroupAppointment(
     address[] memory userEOAs,
     string memory _title,
