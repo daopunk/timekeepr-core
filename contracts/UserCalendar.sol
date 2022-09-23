@@ -30,8 +30,8 @@ contract UserCalendar {
   // 20220918 => (0000 - 2345) => true
   mapping (uint256 => mapping(uint256 => bool)) public appointments;
 
-  uint256[2][7] public availabilityArray = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
   Appointment[] public appointmentsArray;
+  uint256[7][96] public availabilityArray;
 
   function init(string memory userName, address communityTracker) external {
     require(initialization == false);
@@ -78,24 +78,24 @@ contract UserCalendar {
     require(_startTime >= 0, "start time is invalid");
     require(_endTime <= 2345, "start time is invalid");
 
-    uint i = _startTime;
-    for (i; i < _endTime; i += 25) {
+    uint256 i = _startTime;
+    for (i; i < _endTime; i += 15) {
       availability[_day][i] = true;
+      availabilityArray[_day][i / 15] = 1;
     }
-
-    availabilityArray[_day] = [_startTime, _endTime];
   }
   
-  function readAvailability() external view returns (uint256[2][7] memory) {
+  function readAvailability() external view returns (uint256[7][96] memory) {
     return availabilityArray;
   }
 
   function deleteAvailability(uint256 _day, uint256 _startTime, uint256 _endTime) external onlyOwner {
     require(_day >= 0 && _day <= 6, "day is invalid");
 
-    uint i = _startTime;
-    for (i; i < _endTime; i += 25) {
+    uint256 i = _startTime;
+    for (i; i < _endTime; i += 15) {
       availability[_day][i] = false;
+      availabilityArray[_day][i / 15] = 0;
     }
   }
 
@@ -103,6 +103,7 @@ contract UserCalendar {
    * @param _date "20220918" -> September 18th, 2022
    * @param _day 4 -> day of the week
    * @param _startTime 1715 -> 5:15pm
+   * @param _duration how many 15 minute
    */
   function createAppointment(
     string memory _title,
@@ -117,7 +118,7 @@ contract UserCalendar {
 
     // manage scheduling conflict
     for (uint256 i=0; i < _duration; i++) {
-      require(availability[_day][_startTime + (i*25)] == true, "appointment date/time is outside of availability");
+      require(availabilityArray[_day][_startTime + (i*25)] == 1, "appointment date/time is outside of availability");
       require(appointments[_date][_startTime + (i*25)] != true, "appointment date/time is not available");
     }
 
