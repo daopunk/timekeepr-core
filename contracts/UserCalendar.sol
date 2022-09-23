@@ -59,7 +59,7 @@ contract UserCalendar {
     return uint256(block.timestamp + (utc * 60 * 60));
   }
 
-  function createRate(uint256 _rate) external onlyOwner {
+  function createRate(uint256 _rate) external  {
     rate = _rate;
   }
 
