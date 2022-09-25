@@ -5,6 +5,11 @@ interface ICommunityTracker {
   function addUserCalendar(address, address) external;
 }
 
+// PUSH Comm Contract Interface
+interface IPUSHCommInterface {
+    function sendNotification(address _channel, address _recipient, bytes calldata _identity) external;
+}
+
 contract UserCalendar {
   uint256 public utc;
   uint256 public rate;
@@ -12,6 +17,10 @@ contract UserCalendar {
   address public owner;
   string public name;
   bool initialization;
+  address public channel;
+  bool public showTitle;
+  bool public showBody;
+  address public pushComm = 0xb3971BCef2D791bc4027BbfedFb47319A4AAaaAa;
 
   struct Appointment {
     uint256 id;
@@ -180,5 +189,43 @@ contract UserCalendar {
     }
     // does not remove appt from array, only sets all data to 0
     delete appointmentsArray[positionId];
+  }
+
+  // EPNS
+  function setEPNS(bool _showTitle, bool _showBody, address _channel, address _pushComm) external {
+    showTitle = _showTitle;
+    showBody = _showBody;
+    channel = _channel;
+    pushComm = _pushComm;
+  }
+
+  
+  function pushEPNS(string memory text) internal {
+    string memory title = "";
+    string memory body = "";
+    if (showTitle) {
+      title = text;
+    }
+    if (showBody) {
+      body = text;
+    }
+    IPUSHCommInterface(pushComm).sendNotification(
+      channel, // from channel - recommended to set channel via dApp and put it's value -> then once contract is deployed, go back and add the contract address as delegate for your channel
+      owner, // to recipient, put address(this) in case you want Broadcast or Subset. For Targetted put the address to which you want to send
+      bytes(
+        string(
+          // We are passing identity here: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
+          abi.encodePacked(
+            "0", // this is notification identity: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/identity/payload-identity-implementations
+            "+", // segregator
+            "3", // this is payload type: https://docs.epns.io/developers/developer-guides/sending-notifications/advanced/notification-payload-types/payload (1, 3 or 4) = (Broadcast, targetted or subset)
+            "+", // segregator
+            title, // this is notificaiton title
+            "+", // segregator
+            body // notification body
+          )
+        )
+      )
+    );
   }
 }
