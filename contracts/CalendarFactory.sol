@@ -33,7 +33,7 @@ contract CalendarFactory is CloneFactory {
   // create instance of UserCalendar with unique userName and call initialize function (constructor)
   function createUserCal(string memory userName) external {
     UserCalendar userCalendar = UserCalendar(createClone(baseUserCalendar));
-    userCalendar.init(userName, communityTracker);
+    userCalendar.init(userName, communityTracker, msg.sender);
 
     // add UserCalendar address to mapping and array for easy lookup
     userCalendars[msg.sender] = address(userCalendar);
