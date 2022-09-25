@@ -215,7 +215,6 @@ contract UserCalendar {
     pushComm = _pushComm;
   }
 
-  
   function pushEPNS(string memory text) internal {
     string memory title = "";
     string memory body = "";
@@ -245,6 +244,7 @@ contract UserCalendar {
     );
   }
 
+  // utils
   function substring(string memory str, uint startIndex, uint endIndex) public pure returns (string memory ) {
     bytes memory strBytes = bytes(str);
     bytes memory result = new bytes(endIndex-startIndex);
