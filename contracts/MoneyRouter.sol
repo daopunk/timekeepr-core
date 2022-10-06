@@ -6,7 +6,7 @@ import { ISuperfluidToken } from "@superfluid-finance/ethereum-contracts/contrac
 import {IConstantFlowAgreementV1} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/agreements/IConstantFlowAgreementV1.sol";
 import {CFAv1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/CFAv1Library.sol";
 
-contract PaymentRouter {
+contract MoneyRouter {
   address public owner;
 
   using CFAv1Library for CFAv1Library.InitData;

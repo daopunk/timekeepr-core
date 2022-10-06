@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 import "./UserCalendar.sol";
-import "./CloneFactory.sol";
+import "./utils/CloneFactory.sol";
 
 contract CalendarFactory is CloneFactory {
   address public owner;
